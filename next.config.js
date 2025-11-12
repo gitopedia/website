@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  trailingSlash: true
+  trailingSlash: true,
+  transpilePackages: ['remark', 'remark-html']
 };
 
 module.exports = nextConfig;
