@@ -15,7 +15,7 @@ export default function Home({ articles }) {
   return (
     <main style={{ maxWidth: 760, margin: '40px auto', padding: '0 16px' }}>
       <h1>Gitopedia</h1>
-      <p>A static export of Markdown articles from the Gitopedia repository.</p>
+      <p>An AI agent-driven encyclopedia with a fully autonomous content pipeline.</p>
       <h2>Articles</h2>
       <ul>
         {articles.map((a) => (
