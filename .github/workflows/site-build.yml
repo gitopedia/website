@@ -53,6 +53,7 @@ jobs:
       - name: Build and export
         env:
           GITOPEDIA_DIR: gitopedia/Compendium
+          NEXT_PUBLIC_SEARCH_API_URL: ${{ secrets.NEXT_PUBLIC_SEARCH_API_URL }}
         run: |
           npm run build
       - name: Upload static site artifact
