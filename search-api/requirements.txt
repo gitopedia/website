@@ -1,0 +1,6 @@
+# Minimal dependencies for the Gitopedia Search Lambda.
+# sqlite3 is part of the Python standard library; boto3 is provided by AWS Lambda,
+# but we include it here to support local testing and packaging if needed.
+boto3
+
+

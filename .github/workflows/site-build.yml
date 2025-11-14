@@ -34,9 +34,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Setup Python (for search Lambda build)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Install dependencies
         run: |
           npm ci || npm install
+      - name: Build search Lambda package
+        run: |
+          chmod +x scripts/build_search_lambda.sh
+          ./scripts/build_search_lambda.sh
+      - name: Upload search lambda artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-lambda-zip
+          path: search-api/dist/search-lambda.zip
       - name: Build and export
         env:
           GITOPEDIA_DIR: gitopedia/Compendium
