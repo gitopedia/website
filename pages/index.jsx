@@ -33,7 +33,8 @@ export default function Home({ articles }) {
     }
     try {
       setSearching(true);
-      const url = `${searchApiUrl.replace(/\\/$/, '')}/search?q=${encodeURIComponent(query)}`;
+      const baseUrl = searchApiUrl.endsWith('/') ? searchApiUrl.slice(0, -1) : searchApiUrl;
+      const url = `${baseUrl}/search?q=${encodeURIComponent(query)}`;
       const res = await fetch(url);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
