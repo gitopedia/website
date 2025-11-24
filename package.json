@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/generate_redirects.js",
     "start": "serve -s out"
   },
   "dependencies": {
@@ -16,5 +17,3 @@
     "remark-html": "^16.0.1"
   }
 }
-
-
