@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	dbPath     string
+	dbPath      string
 	indexBucket = os.Getenv("INDEX_BUCKET")
 	indexKey    = os.Getenv("INDEX_KEY")
 	corsOrigin  = os.Getenv("CORS_ORIGIN")
@@ -34,6 +34,8 @@ func init() {
 	if corsOrigin == "" {
 		corsOrigin = "*"
 	}
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 }
 
 type SearchResult struct {
@@ -178,7 +180,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		safeTag := strings.ReplaceAll(tag, "\"", "\"\"")
 		parts = append(parts, fmt.Sprintf("tags:\"%s\"", safeTag))
 	}
-	
+
 	finalQuery := strings.Join(parts, " AND ")
 
 	if finalQuery == "" {
@@ -210,7 +212,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 
 	results, err := search(ctx, finalQuery, limit, offset)
 	if err != nil {
-		log.Printf("Search error: %v", err)
+		slog.Error("Search error", "err", err)
 		return response(500, map[string]string{"error": "Internal search error"}), nil
 	}
 
@@ -270,7 +272,7 @@ func handleTags(ctx context.Context) (events.APIGatewayProxyResponse, error) {
 		return result[i].Count > result[j].Count
 	})
 
-	return response(200, result)
+	return response(200, result), nil
 }
 
 func response(code int, body interface{}) events.APIGatewayProxyResponse {
@@ -282,6 +284,10 @@ func response(code int, body interface{}) events.APIGatewayProxyResponse {
 			"Access-Control-Allow-Origin":  corsOrigin,
 			"Access-Control-Allow-Methods": "GET,OPTIONS",
 			"Access-Control-Allow-Headers": "Content-Type",
+			"Strict-Transport-Security":    "max-age=63072000; includeSubDomains; preload",
+			"X-Content-Type-Options":       "nosniff",
+			"X-Frame-Options":              "DENY",
+			"Content-Security-Policy":      "default-src 'none'; frame-ancestors 'none'",
 		},
 		Body: string(b),
 	}
@@ -290,4 +296,3 @@ func response(code int, body interface{}) events.APIGatewayProxyResponse {
 func main() {
 	lambda.Start(handleRequest)
 }
-
