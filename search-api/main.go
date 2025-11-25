@@ -94,7 +94,7 @@ func downloadIndex(ctx context.Context) (string, error) {
 	return dbPath, nil
 }
 
-func search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+func search(ctx context.Context, query string, limit, offset int) ([]SearchResult, error) {
 	path, err := downloadIndex(ctx)
 	if err != nil {
 		return nil, err
@@ -106,18 +106,19 @@ func search(ctx context.Context, query string, limit int) ([]SearchResult, error
 	}
 	defer db.Close()
 
-	// FTS query
+	// FTS query with bm25 ranking and pagination
+	// Weights: content=1.0, title=10.0, summary=5.0, tags=2.0
 	sqlQuery := `
 		SELECT a.id, a.title, a.path, a.summary, a.tags, a.author,
 		       snippet(article_index, 0, '<b>', '</b>', ' ... ', 15)
 		FROM article_index
 		JOIN articles a ON article_index.id = a.id
 		WHERE article_index MATCH ?
-		ORDER BY rank
-		LIMIT ?
+		ORDER BY bm25(article_index, 1.0, 10.0, 5.0, 2.0)
+		LIMIT ? OFFSET ?
 	`
 
-	rows, err := db.QueryContext(ctx, sqlQuery, query, limit)
+	rows, err := db.QueryContext(ctx, sqlQuery, query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +194,16 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		limit = 1
 	}
 
-	results, err := search(ctx, finalQuery, limit)
+	pageStr := request.QueryStringParameters["page"]
+	page := 1
+	if pageStr != "" {
+		if v, err := strconv.Atoi(pageStr); err == nil && v > 0 {
+			page = v
+		}
+	}
+	offset := (page - 1) * limit
+
+	results, err := search(ctx, finalQuery, limit, offset)
 	if err != nil {
 		log.Printf("Search error: %v", err)
 		return response(500, map[string]string{"error": "Internal search error"}), nil
@@ -202,6 +212,7 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 	return response(200, map[string]interface{}{
 		"results": results,
 		"count":   len(results),
+		"page":    page,
 		"query":   finalQuery,
 	}), nil
 }
