@@ -60,18 +60,20 @@ def _get_db_path() -> str:
 def _search_index(query: str, limit: int = 10) -> List[Dict[str, Any]]:
     """
     Execute a full-text search against the index.sqlite FTS table.
-    Assumes schema from knowledge-base/scripts/build_index.py:
-      - articles(id TEXT PRIMARY KEY, title TEXT, path TEXT)
-      - article_index(content, title, id UNINDEXED)
+    Schema:
+      - articles(id TEXT PRIMARY KEY, title TEXT, path TEXT, author TEXT, summary TEXT, tags TEXT, meta_json TEXT)
+      - article_index(content, title, summary, tags, id UNINDEXED)
     """
     db_path = _get_db_path()
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     try:
-        # Use parameter binding to avoid injection, even though FTS MATCH is limited.
+        # FTS5 query
+        # We explicitly select columns from 'articles' to return metadata.
+        # We snippet 'content' (column 0 in FTS table).
         sql = """
-        SELECT a.id, a.title, a.path,
-               snippet(article_index, 0, '<b>', '</b>', ' … ', 10) AS snippet
+        SELECT a.id, a.title, a.path, a.summary, a.tags, a.author,
+               snippet(article_index, 0, '<b>', '</b>', ' ... ', 15) AS snippet
         FROM article_index
         JOIN articles a ON article_index.id = a.id
         WHERE article_index MATCH ?
@@ -82,11 +84,22 @@ def _search_index(query: str, limit: int = 10) -> List[Dict[str, Any]]:
         rows = cur.fetchall()
         results: List[Dict[str, Any]] = []
         for row in rows:
+            # Parse tags JSON if possible, otherwise return as string/list
+            tags = row["tags"]
+            try:
+                if tags:
+                    tags = json.loads(tags)
+            except:
+                pass
+
             results.append(
                 {
                     "id": row["id"],
                     "title": row["title"],
                     "path": row["path"],
+                    "summary": row["summary"],
+                    "author": row["author"],
+                    "tags": tags,
                     "snippet": row["snippet"],
                 }
             )
@@ -112,18 +125,32 @@ def _build_response(body: Dict[str, Any], status_code: int = 200) -> Dict[str, A
 def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
     AWS Lambda entrypoint.
-
-    Supports both REST API and HTTP API style events where query parameters
-    are under event['queryStringParameters'].
     """
     # Handle CORS preflight
     if event.get("httpMethod") == "OPTIONS" or event.get("requestContext", {}).get("http", {}).get("method") == "OPTIONS":
         return _build_response({"ok": True})
 
     params = event.get("queryStringParameters") or {}
-    query = params.get("q") or ""
-    if not query.strip():
-        return _build_response({"results": [], "error": "Missing query parameter 'q'."}, status_code=400)
+    raw_query = params.get("q") or ""
+    tag_filter = params.get("tag")
+
+    # Build FTS query
+    # If user provides "q", use it.
+    # If user provides "tag", append it as filter: tags:"value"
+    
+    parts = []
+    if raw_query.strip():
+        parts.append(raw_query.strip())
+    
+    if tag_filter and tag_filter.strip():
+        # Escape quotes in tag to prevent query syntax errors
+        safe_tag = tag_filter.replace('"', '""')
+        parts.append(f'tags:"{safe_tag}"')
+    
+    final_query = " AND ".join(parts)
+
+    if not final_query.strip():
+        return _build_response({"results": [], "error": "Missing query parameter 'q' or 'tag'."}, status_code=400)
 
     # Optional limit parameter
     limit_param = params.get("limit")
@@ -134,15 +161,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     limit = max(1, min(limit, 50))
 
     try:
-        results = _search_index(query=query, limit=limit)
+        results = _search_index(query=final_query, limit=limit)
         return _build_response(
             {
                 "results": results,
                 "count": len(results),
+                "query": final_query
             }
         )
     except Exception as e:
-        # For now, return a generic error (log details via CloudWatch)
-        return _build_response({"results": [], "error": str(e)}, status_code=500)
-
-
+        # Log error (print to CloudWatch)
+        print(f"Search error: {e}")
+        return _build_response({"results": [], "error": "Internal search error."}, status_code=500)
