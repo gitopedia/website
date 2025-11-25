@@ -117,6 +117,10 @@ export default function Home({ articles }) {
           </li>
         ))}
       </ul>
+
+      <footer style={{ marginTop: 40, borderTop: '1px solid #eee', paddingTop: 20, color: '#888', fontSize: '0.8rem', textAlign: 'center' }}>
+        <p>Gitopedia v{process.env.NEXT_PUBLIC_GITOPEDIA_VERSION || 'dev'}</p>
+      </footer>
     </main>
   );
 }
