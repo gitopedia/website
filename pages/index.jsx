@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { getAllArticles } from '../lib/content';
 
 export async function getStaticProps() {
@@ -13,6 +14,7 @@ export async function getStaticProps() {
 }
 
 export default function Home({ articles }) {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -20,13 +22,8 @@ export default function Home({ articles }) {
 
   const searchApiUrl = process.env.NEXT_PUBLIC_SEARCH_API_URL;
 
-  async function handleSearch(e) {
-    e.preventDefault();
+  async function performSearch(q, tag) {
     setError('');
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
     if (!searchApiUrl) {
       setError('Search API URL is not configured.');
       return;
@@ -34,7 +31,10 @@ export default function Home({ articles }) {
     try {
       setSearching(true);
       const baseUrl = searchApiUrl.endsWith('/') ? searchApiUrl.slice(0, -1) : searchApiUrl;
-      const url = `${baseUrl}/search?q=${encodeURIComponent(query)}`;
+      let url = `${baseUrl}/search?`;
+      if (q) url += `q=${encodeURIComponent(q)}`;
+      if (tag) url += `${q ? '&' : ''}tag=${encodeURIComponent(tag)}`;
+      
       const res = await fetch(url);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -49,10 +49,31 @@ export default function Home({ articles }) {
     }
   }
 
+  useEffect(() => {
+    if (!router.isReady) return;
+    const { q, tag } = router.query;
+    if (q || tag) {
+      if (q) setQuery(q);
+      performSearch(q, tag);
+    }
+  }, [router.isReady, router.query]);
+
+  async function handleSearch(e) {
+    e.preventDefault();
+    if (!query.trim()) {
+        setResults([]);
+        return;
+    }
+    // Update URL
+    router.push(`/?q=${encodeURIComponent(query)}`, undefined, { shallow: true });
+    performSearch(query, null);
+  }
+
   return (
     <main style={{ maxWidth: 760, margin: '40px auto', padding: '0 16px' }}>
       <h1>Gitopedia</h1>
       <p>An AI agent-driven encyclopedia with a fully autonomous content pipeline.</p>
+      <Link href="/browse" style={{ display: 'inline-block', marginBottom: 20 }}>Browse Topics</Link>
 
       <section style={{ margin: '24px 0' }}>
         <h2>Search</h2>

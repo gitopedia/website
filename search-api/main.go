@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -161,6 +162,10 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		}, nil
 	}
 
+	if request.QueryStringParameters["action"] == "tags" {
+		return handleTags(ctx)
+	}
+
 	q := request.QueryStringParameters["q"]
 	tag := request.QueryStringParameters["tag"]
 
@@ -215,6 +220,57 @@ func handleRequest(ctx context.Context, request events.APIGatewayProxyRequest) (
 		"page":    page,
 		"query":   finalQuery,
 	}), nil
+}
+
+func handleTags(ctx context.Context) (events.APIGatewayProxyResponse, error) {
+	path, err := downloadIndex(ctx)
+	if err != nil {
+		return response(500, map[string]string{"error": "Failed to load index"}), nil
+	}
+
+	db, err := sql.Open("sqlite", path)
+	if err != nil {
+		return response(500, map[string]string{"error": "Failed to open DB"}), nil
+	}
+	defer db.Close()
+
+	rows, err := db.QueryContext(ctx, "SELECT tags FROM articles")
+	if err != nil {
+		return response(500, map[string]string{"error": "Query failed"}), nil
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int)
+	for rows.Next() {
+		var tagsStr string
+		if err := rows.Scan(&tagsStr); err != nil {
+			continue
+		}
+		var tags []string
+		if err := json.Unmarshal([]byte(tagsStr), &tags); err == nil {
+			for _, t := range tags {
+				counts[t]++
+			}
+		}
+	}
+
+	type Tag struct {
+		Name  string `json:"name"`
+		Count int    `json:"count"`
+	}
+	var result []Tag
+	for k, v := range counts {
+		result = append(result, Tag{Name: k, Count: v})
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Count == result[j].Count {
+			return result[i].Name < result[j].Name
+		}
+		return result[i].Count > result[j].Count
+	})
+
+	return response(200, result)
 }
 
 func response(code int, body interface{}) events.APIGatewayProxyResponse {
