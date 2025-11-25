@@ -1,13 +1,12 @@
 # Gitopedia Search API (Lambda)
 
-This directory contains the Python code for the Gitopedia Search Lambda. The function:
+This directory contains the Go code for the Gitopedia Search Lambda. The function:
 
 - Downloads the Knowledgebase SQLite full-text index (`index.sqlite`) from S3
 - Executes full-text queries using SQLite FTS
 - Returns JSON search results to the Gitopedia website
 
-The Lambda is deployed by the Solus CDK stack (`GitopediaStack`) and exposed via an API Gateway
-`/search` endpoint. The website frontend calls this API to implement search.
+The Lambda is deployed by the Solus CDK stack (`GitopediaStack`) using the `provided.al2023` runtime and exposed via an API Gateway `/search` endpoint.
 
 ## Environment variables
 
@@ -17,25 +16,6 @@ The Lambda is deployed by the Solus CDK stack (`GitopediaStack`) and exposed via
 
 ## Local development
 
-For local testing you can:
-
-1. Create a virtualenv and install dependencies:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-2. Download an `index.sqlite` from the Knowledgebase S3 bucket to a local file and set:
-
-```bash
-export INDEX_BUCKET=local
-export INDEX_KEY=index.sqlite
-```
-
-3. Temporarily change `_get_db_path` in `app.py` to point at your local file, or mock S3 in tests.
-
-The actual packaging and deployment are handled by the website CI and the Solus CDK stack.
-
-
+1. Install Go.
+2. Run `go mod tidy`.
+3. Build: `go build -o bootstrap main.go`.

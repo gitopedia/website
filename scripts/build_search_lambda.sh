@@ -1,27 +1,19 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+set -e
 
-# Build script for the Gitopedia Search Lambda.
-# Produces website/search-api/dist/search-lambda.zip suitable for deployment via CDK.
+# Build the search lambda
+echo "Building Search Lambda (Go)..."
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SEARCH_API_DIR="${ROOT_DIR}/search-api"
-DIST_DIR="${SEARCH_API_DIR}/dist"
-BUILD_DIR="${SEARCH_API_DIR}/build"
+cd search-api
+mkdir -p dist
 
-rm -rf "${BUILD_DIR}" "${DIST_DIR}"
-mkdir -p "${BUILD_DIR}" "${DIST_DIR}"
+# Clean old build
+rm -rf dist/*
 
-echo "Installing Lambda dependencies into build dir..."
-python -m pip install --upgrade pip >/dev/null
-pip install -r "${SEARCH_API_DIR}/requirements.txt" -t "${BUILD_DIR}" >/dev/null
+# Build for AWS Lambda (AL2023 provided runtime)
+GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o dist/bootstrap main.go
 
-echo "Copying Lambda handler..."
-cp "${SEARCH_API_DIR}/app.py" "${BUILD_DIR}/"
-
-echo "Packaging search-lambda.zip..."
-(cd "${BUILD_DIR}" && zip -r "${DIST_DIR}/search-lambda.zip" . >/dev/null)
-
-echo "Search Lambda package created at: ${DIST_DIR}/search-lambda.zip"
-
-
+# Zip it
+cd dist
+zip search-lambda.zip bootstrap
+echo "Created search-lambda.zip"

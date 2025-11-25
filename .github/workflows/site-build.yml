@@ -34,15 +34,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Setup Python (for search Lambda build)
-        uses: actions/setup-python@v5
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          python-version: '3.11'
+          go-version: '1.21'
       - name: Install dependencies
         run: |
           npm ci || npm install
       - name: Build search Lambda package
         run: |
+          cd search-api && go mod tidy && cd ..
           chmod +x scripts/build_search_lambda.sh
           ./scripts/build_search_lambda.sh
       - name: Upload search lambda artifact
