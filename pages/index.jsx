@@ -8,7 +8,8 @@ export async function getStaticProps() {
     .map(a => ({
       href: '/' + a.slugParts.map(encodeURIComponent).join('/'),
       title: a.slugParts[a.slugParts.length - 1].replace(/-/g, ' '),
-      created: a.created
+      created: a.created,
+      model: a.model
     }))
     .sort((a, b) => {
       // Sort by date (newest first), then by title if dates are equal
@@ -123,17 +124,26 @@ export default function Home({ articles }) {
         {articles.map((a) => (
           <li key={a.href} style={{ marginBottom: '8px' }}>
             <Link href={a.href}>{a.title}</Link>
-            {a.created && (
+            {(a.created || a.model) && (
               <span style={{ marginLeft: '12px', fontSize: '0.85em', color: '#666' }}>
-                {a.created.toLocaleString('en-US', { 
-                  year: 'numeric', 
-                  month: 'short', 
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  timeZone: 'UTC',
-                  timeZoneName: 'short'
-                })}
+                {a.created && (
+                  <span>
+                    {a.created.toLocaleString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      timeZone: 'UTC',
+                      timeZoneName: 'short'
+                    })}
+                  </span>
+                )}
+                {a.model && (
+                  <span style={{ marginLeft: a.created ? '8px' : '0' }}>
+                    • {a.model}
+                  </span>
+                )}
               </span>
             )}
           </li>
