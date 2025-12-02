@@ -7,9 +7,18 @@ export async function getStaticProps() {
   const articles = getAllArticles()
     .map(a => ({
       href: '/' + a.slugParts.map(encodeURIComponent).join('/'),
-      title: a.slugParts[a.slugParts.length - 1].replace(/-/g, ' ')
+      title: a.slugParts[a.slugParts.length - 1].replace(/-/g, ' '),
+      created: a.created
     }))
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .sort((a, b) => {
+      // Sort by date (newest first), then by title if dates are equal
+      if (a.created && b.created) {
+        return b.created.getTime() - a.created.getTime();
+      }
+      if (a.created) return -1;
+      if (b.created) return 1;
+      return a.title.localeCompare(b.title);
+    });
   return { props: { articles } };
 }
 
@@ -112,8 +121,21 @@ export default function Home({ articles }) {
       <h2>Articles</h2>
       <ul>
         {articles.map((a) => (
-          <li key={a.href}>
+          <li key={a.href} style={{ marginBottom: '8px' }}>
             <Link href={a.href}>{a.title}</Link>
+            {a.created && (
+              <span style={{ marginLeft: '12px', fontSize: '0.85em', color: '#666' }}>
+                {a.created.toLocaleString('en-US', { 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'UTC',
+                  timeZoneName: 'short'
+                })}
+              </span>
+            )}
           </li>
         ))}
       </ul>
