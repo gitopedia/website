@@ -8,13 +8,13 @@ export async function getStaticProps() {
     .map(a => ({
       href: '/' + a.slugParts.map(encodeURIComponent).join('/'),
       title: a.slugParts[a.slugParts.length - 1].replace(/-/g, ' '),
-      created: a.created,
+      created: a.created ? a.created.toISOString() : null,
       model: a.model
     }))
     .sort((a, b) => {
       // Sort by date (newest first), then by title if dates are equal
       if (a.created && b.created) {
-        return b.created.getTime() - a.created.getTime();
+        return new Date(b.created).getTime() - new Date(a.created).getTime();
       }
       if (a.created) return -1;
       if (b.created) return 1;
@@ -128,7 +128,7 @@ export default function Home({ articles }) {
               <span style={{ marginLeft: '12px', fontSize: '0.85em', color: '#666' }}>
                 {a.created && (
                   <span>
-                    {a.created.toLocaleString('en-US', { 
+                    {new Date(a.created).toLocaleString('en-US', { 
                       year: 'numeric', 
                       month: 'short', 
                       day: 'numeric',
