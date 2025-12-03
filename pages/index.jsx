@@ -9,7 +9,8 @@ export async function getStaticProps() {
       href: '/' + a.slugParts.map(encodeURIComponent).join('/'),
       title: a.slugParts[a.slugParts.length - 1].replace(/-/g, ' '),
       created: a.created ? a.created.toISOString() : null,
-      model: a.model
+      model: a.model,
+      researcherVersion: a.researcherVersion
     }))
     .sort((a, b) => {
       // Sort by date (newest first), then by title if dates are equal
@@ -143,7 +144,7 @@ export default function Home({ articles }) {
         {articles.map((a) => (
           <li key={a.href} style={{ marginBottom: '8px' }}>
             <Link href={a.href}>{a.title}</Link>
-            {(a.created || a.model) && (
+            {(a.created || a.model || a.researcherVersion) && (
               <span style={{ marginLeft: '12px', fontSize: '0.85em', color: '#666' }}>
                 {a.created && (
                   <span>
@@ -161,6 +162,11 @@ export default function Home({ articles }) {
                 {a.model && (
                   <span style={{ marginLeft: a.created ? '8px' : '0' }}>
                     • {a.model}
+                  </span>
+                )}
+                {a.researcherVersion && (
+                  <span style={{ marginLeft: (a.created || a.model) ? '8px' : '0' }}>
+                    • v{a.researcherVersion}
                   </span>
                 )}
               </span>
