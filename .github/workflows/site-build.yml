@@ -6,6 +6,7 @@ on:
   pull_request:
   repository_dispatch:
     types: [ rebuild-site ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Checkout Gitopedia content (dispatched)
-        if: github.event_name == 'repository_dispatch'
+        if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
         uses: actions/checkout@v4
         with:
           repository: gitopedia/gitopedia
@@ -24,7 +25,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.client_payload.gitopedia_sha || 'main' }}
       - name: Checkout Gitopedia content (default)
-        if: github.event_name != 'repository_dispatch'
+        if: github.event_name != 'repository_dispatch' && github.event_name != 'workflow_dispatch'
         uses: actions/checkout@v4
         with:
           repository: gitopedia/gitopedia
@@ -68,7 +69,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'repository_dispatch'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
     permissions:
       id-token: write
       contents: read
