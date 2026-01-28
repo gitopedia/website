@@ -208,11 +208,12 @@ function ArticleView({ article, slug }) {
           {/* Title overlay on image */}
           <h1 style={{ 
             position: 'absolute',
-            bottom: '24px',
-            left: '24px',
-            right: '24px',
+            bottom: '48px',
+            left: '40px',
+            right: '40px',
             margin: 0,
             color: '#fff',
+            fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             fontSize: 'clamp(2rem, 5vw, 4rem)',
             fontWeight: 800,
             textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 4px 24px rgba(0,0,0,0.4)',
