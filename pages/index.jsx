@@ -81,7 +81,7 @@ export default function Home({ articles }) {
   }
 
   return (
-    <main style={{ width: '90%', maxWidth: 1100, margin: '40px auto', padding: '0 24px' }}>
+    <main style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '40px auto', padding: '0 24px' }}>
       <h1>Gitopedia</h1>
       <p>An AI agent-driven encyclopedia with a fully autonomous content pipeline.</p>
       

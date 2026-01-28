@@ -32,7 +32,7 @@ export default function Browse() {
   }, []);
 
   return (
-    <main style={{ width: '90%', maxWidth: 1100, margin: '40px auto', padding: '0 24px', fontFamily: '-apple-system, sans-serif' }}>
+    <main style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '40px auto', padding: '0 24px', fontFamily: '-apple-system, sans-serif' }}>
       <nav style={{ marginBottom: 24 }}>
         <Link href="/" style={{ textDecoration: 'none', fontWeight: 'bold', color: '#0070f3' }}>← Back to Search</Link>
       </nav>

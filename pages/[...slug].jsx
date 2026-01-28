@@ -72,7 +72,7 @@ function IndexPageView({ page, slug }) {
   const githubRepoUrl = 'https://github.com/Gitopedia/gitopedia';
   
   return (
-    <main style={{ width: '90%', maxWidth: 1100, margin: '40px auto', padding: '0 24px' }}>
+    <main style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '40px auto', padding: '0 24px' }}>
       <h1>{title}</h1>
       
       {/* Breadcrumb Navigation */}
@@ -207,7 +207,7 @@ function ArticleView({ article, slug }) {
         </div>
       )}
 
-      <div style={{ width: '90%', maxWidth: 1100, margin: '0 auto', padding: '24px 24px 40px' }}>
+      <div style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '0 auto', padding: '24px 24px 40px' }}>
         {/* Topic Heading */}
         <h1 style={{ marginBottom: '8px' }}>{articleTitle}</h1>
 
