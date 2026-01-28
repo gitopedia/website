@@ -57,73 +57,6 @@ export default function ArticlePage({ article, page, slug, isIndexPage }) {
   return <ArticleView article={article} slug={slug} />;
 }
 
-// Inline cascading breadcrumb component with chevron separator
-function CascadingBreadcrumbs({ items }) {
-  if (!items || items.length === 0) return null;
-  
-  return (
-    <nav style={{ 
-      marginBottom: '24px',
-      fontSize: '0.85em',
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'baseline',
-      gap: '0'
-    }}>
-      {items.map((item, index) => (
-        <span 
-          key={item.href || index}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            position: 'relative',
-            top: `${index * 2}px`
-          }}
-        >
-          {index > 0 && (
-            <svg 
-              width="14" 
-              height="14" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="var(--text-muted)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ 
-                margin: '0 6px',
-                opacity: 0.5,
-                flexShrink: 0
-              }}
-            >
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          )}
-          {item.href ? (
-            <Link 
-              href={item.href} 
-              style={{ 
-                color: 'var(--link-color)', 
-                textDecoration: 'none',
-                fontWeight: index === items.length - 1 ? 500 : 400
-              }}
-            >
-              {item.label}
-            </Link>
-          ) : (
-            <span style={{ 
-              color: 'var(--text-muted)',
-              fontWeight: 500
-            }}>
-              {item.label}
-            </span>
-          )}
-        </span>
-      ))}
-    </nav>
-  );
-}
-
 // Component for domain/category/topic index pages
 function IndexPageView({ page, slug }) {
   const fm = page.frontMatter || {};
@@ -137,18 +70,6 @@ function IndexPageView({ page, slug }) {
   const githubIssueIds = fm.github_issue_ids || [];
   
   const githubRepoUrl = 'https://github.com/Gitopedia/gitopedia';
-
-  // Build breadcrumb items
-  const breadcrumbItems = [
-    { label: 'Home', href: '/' }
-  ];
-  
-  if (domain && domainSlug && page.pageType !== 'domain') {
-    breadcrumbItems.push({ label: domain, href: `/${domainSlug}` });
-  }
-  if (category && categorySlug && page.pageType === 'topic') {
-    breadcrumbItems.push({ label: category, href: `/${domainSlug}/${categorySlug}` });
-  }
   
   return (
     <main style={{ 
@@ -160,8 +81,36 @@ function IndexPageView({ page, slug }) {
     }}>
       <h1>{title}</h1>
       
-      {/* Cascading Breadcrumb Navigation */}
-      <CascadingBreadcrumbs items={breadcrumbItems} />
+      {/* Breadcrumb Navigation */}
+      <nav style={{ 
+        marginBottom: '24px', 
+        fontSize: '0.9em', 
+        color: 'var(--text-muted)',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '4px',
+        alignItems: 'center'
+      }}>
+        <Link href="/" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+          Home
+        </Link>
+        {domain && domainSlug && page.pageType !== 'domain' && (
+          <>
+            <span style={{ margin: '0 4px' }}>/</span>
+            <Link href={`/${domainSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+              {domain}
+            </Link>
+          </>
+        )}
+        {category && categorySlug && page.pageType === 'topic' && (
+          <>
+            <span style={{ margin: '0 4px' }}>/</span>
+            <Link href={`/${domainSlug}/${categorySlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+              {category}
+            </Link>
+          </>
+        )}
+      </nav>
 
       {/* Page Content */}
       <article 
@@ -247,18 +196,6 @@ function ArticleView({ article, slug }) {
 
   // GitHub repo URL (adjust as needed)
   const githubRepoUrl = 'https://github.com/Gitopedia/gitopedia';
-
-  // Build breadcrumb items for article
-  const breadcrumbItems = [];
-  if (domain && domainSlug) {
-    breadcrumbItems.push({ label: domain, href: `/${domainSlug}` });
-  }
-  if (category && categorySlug && domainSlug) {
-    breadcrumbItems.push({ label: category, href: `/${domainSlug}/${categorySlug}` });
-  }
-  if (topic && topicSlug && categorySlug && domainSlug) {
-    breadcrumbItems.push({ label: topic, href: `/${domainSlug}/${categorySlug}/${topicSlug}` });
-  }
   
   return (
     <main style={{ maxWidth: '100%', margin: 0, padding: 0 }}>
@@ -322,8 +259,38 @@ function ArticleView({ article, slug }) {
           </h1>
         )}
 
-        {/* Cascading Breadcrumb Navigation */}
-        <CascadingBreadcrumbs items={breadcrumbItems} />
+        {/* Breadcrumb Navigation */}
+        <nav style={{ 
+          marginBottom: '24px', 
+          fontSize: '0.9em', 
+          color: 'var(--text-muted)',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '4px',
+          alignItems: 'center'
+        }}>
+          {domain && domainSlug && (
+            <>
+              <Link href={`/${domainSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+                {domain}
+              </Link>
+              <span style={{ margin: '0 4px' }}>/</span>
+            </>
+          )}
+          {category && categorySlug && domainSlug && (
+            <>
+              <Link href={`/${domainSlug}/${categorySlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+                {category}
+              </Link>
+              <span style={{ margin: '0 4px' }}>/</span>
+            </>
+          )}
+          {topic && topicSlug && categorySlug && domainSlug && (
+            <Link href={`/${domainSlug}/${categorySlug}/${topicSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+              {topic}
+            </Link>
+          )}
+        </nav>
 
         {/* Article Content */}
         <article 

@@ -189,26 +189,38 @@ export default function App({ Component, pageProps }) {
           opacity: 0.9;
         }
         
-        /* References/Footnotes styling - each on new line */
-        article .footnotes ol li,
-        article .footnotes li {
-          display: block;
+        /* References section styling */
+        article .references {
+          margin-top: 3em;
+          padding-top: 1.5em;
+          border-top: 2px solid var(--border-color);
+        }
+        article .references h2 {
+          font-size: 1.4em;
           margin-bottom: 1em;
         }
-        article .footnotes ol {
-          padding-left: 0;
-          list-style-position: inside;
+        article .references ol {
+          padding-left: 1.5em;
+          list-style-type: decimal;
         }
-        article .footnotes {
-          margin-top: 2em;
-          padding-top: 1em;
-          border-top: 1px solid var(--border-color);
-          font-size: 0.9em;
+        article .references ol li {
+          display: list-item;
+          margin-bottom: 1em;
+          padding-left: 0.5em;
+          line-height: 1.6;
+        }
+        article .references a {
+          word-break: break-all;
         }
         /* Footnote reference links in text */
-        article sup a[href^="#fn"] {
-          font-size: 0.8em;
-          padding: 0 2px;
+        article sup a {
+          font-size: 0.85em;
+          color: var(--link-color);
+          text-decoration: none;
+          padding: 0 1px;
+        }
+        article sup a:hover {
+          text-decoration: underline;
         }
         /* General list styling */
         article ol li,
