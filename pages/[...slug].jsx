@@ -79,19 +79,19 @@ function IndexPageView({ page, slug }) {
       <nav style={{ 
         marginBottom: '24px', 
         fontSize: '0.9em', 
-        color: '#666',
+        color: 'var(--text-muted)',
         display: 'flex',
         flexWrap: 'wrap',
         gap: '4px',
         alignItems: 'center'
       }}>
-        <Link href="/" style={{ color: '#0066cc', textDecoration: 'none' }}>
+        <Link href="/" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
           Home
         </Link>
         {domain && domainSlug && page.pageType !== 'domain' && (
           <>
             <span style={{ margin: '0 4px' }}>/</span>
-            <Link href={`/${domainSlug}`} style={{ color: '#0066cc', textDecoration: 'none' }}>
+            <Link href={`/${domainSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
               {domain}
             </Link>
           </>
@@ -99,7 +99,7 @@ function IndexPageView({ page, slug }) {
         {category && categorySlug && page.pageType === 'topic' && (
           <>
             <span style={{ margin: '0 4px' }}>/</span>
-            <Link href={`/${domainSlug}/${categorySlug}`} style={{ color: '#0066cc', textDecoration: 'none' }}>
+            <Link href={`/${domainSlug}/${categorySlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
               {category}
             </Link>
           </>
@@ -114,9 +114,9 @@ function IndexPageView({ page, slug }) {
         <footer style={{ 
           marginTop: '40px', 
           paddingTop: '20px', 
-          borderTop: '1px solid #eee',
+          borderTop: '1px solid var(--border-color)',
           fontSize: '0.9em',
-          color: '#666'
+          color: 'var(--text-muted)'
         }}>
           <div>
             <strong>GitHub Issues:</strong>{' '}
@@ -126,7 +126,7 @@ function IndexPageView({ page, slug }) {
                   href={`${githubRepoUrl}/issues/${id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#0066cc', textDecoration: 'none' }}
+                  style={{ color: 'var(--link-color)', textDecoration: 'none' }}
                 >
                   #{id}
                 </a>
@@ -208,13 +208,13 @@ function ArticleView({ article, slug }) {
           {/* Title overlay on image */}
           <h1 style={{ 
             position: 'absolute',
-            bottom: '48px',
-            left: '40px',
-            right: '40px',
+            bottom: '64px',
+            left: '56px',
+            right: '56px',
             margin: 0,
             color: '#fff',
             fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            fontSize: 'clamp(2rem, 5vw, 4rem)',
+            fontSize: 'clamp(2.5rem, 6vw, 5rem)',
             fontWeight: 800,
             textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 4px 24px rgba(0,0,0,0.4)',
             lineHeight: 1.1
@@ -232,7 +232,7 @@ function ArticleView({ article, slug }) {
         <nav style={{ 
           marginBottom: '24px', 
           fontSize: '0.9em', 
-          color: '#666',
+          color: 'var(--text-muted)',
           display: 'flex',
           flexWrap: 'wrap',
           gap: '4px',
@@ -240,7 +240,7 @@ function ArticleView({ article, slug }) {
         }}>
           {domain && domainSlug && (
             <>
-              <Link href={`/${domainSlug}`} style={{ color: '#0066cc', textDecoration: 'none' }}>
+              <Link href={`/${domainSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
                 {domain}
               </Link>
               <span style={{ margin: '0 4px' }}>/</span>
@@ -248,14 +248,14 @@ function ArticleView({ article, slug }) {
           )}
           {category && categorySlug && domainSlug && (
             <>
-              <Link href={`/${domainSlug}/${categorySlug}`} style={{ color: '#0066cc', textDecoration: 'none' }}>
+              <Link href={`/${domainSlug}/${categorySlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
                 {category}
               </Link>
               <span style={{ margin: '0 4px' }}>/</span>
             </>
           )}
           {topic && topicSlug && categorySlug && domainSlug && (
-            <Link href={`/${domainSlug}/${categorySlug}/${topicSlug}`} style={{ color: '#0066cc', textDecoration: 'none' }}>
+            <Link href={`/${domainSlug}/${categorySlug}/${topicSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
               {topic}
             </Link>
           )}
@@ -268,9 +268,9 @@ function ArticleView({ article, slug }) {
         <footer style={{ 
           marginTop: '40px', 
           paddingTop: '20px', 
-          borderTop: '1px solid #eee',
+          borderTop: '1px solid var(--border-color)',
           fontSize: '0.9em',
-          color: '#666'
+          color: 'var(--text-muted)'
         }}>
           {/* Created & Model Info */}
           <div style={{ marginBottom: '16px' }}>
@@ -316,7 +316,7 @@ function ArticleView({ article, slug }) {
                         href={`${githubRepoUrl}/issues/${id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ color: '#0066cc', textDecoration: 'none' }}
+                        style={{ color: 'var(--link-color)', textDecoration: 'none' }}
                       >
                         #{id}
                       </a>
@@ -334,7 +334,7 @@ function ArticleView({ article, slug }) {
                         href={`${githubRepoUrl}/pull/${id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ color: '#0066cc', textDecoration: 'none' }}
+                        style={{ color: 'var(--link-color)', textDecoration: 'none' }}
                       >
                         #{id}
                       </a>

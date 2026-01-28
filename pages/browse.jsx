@@ -34,7 +34,7 @@ export default function Browse() {
   return (
     <main style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '40px auto', padding: '0 24px', fontFamily: '-apple-system, sans-serif' }}>
       <nav style={{ marginBottom: 24 }}>
-        <Link href="/" style={{ textDecoration: 'none', fontWeight: 'bold', color: '#0070f3' }}>← Back to Search</Link>
+        <Link href="/" style={{ textDecoration: 'none', fontWeight: 'bold', color: 'var(--link-color)' }}>← Back to Search</Link>
       </nav>
       
       <h1>Browse Topics</h1>
@@ -50,25 +50,25 @@ export default function Browse() {
                 href={`/?tag=${encodeURIComponent(tag.name)}`}
                 style={{
                     padding: '8px 16px',
-                    background: '#f0f0f0',
+                    background: 'var(--border-color)',
                     borderRadius: 20,
                     textDecoration: 'none',
-                    color: '#333',
+                    color: 'var(--text-color)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    border: '1px solid #ddd'
+                    border: '1px solid var(--border-color)'
                 }}
             >
                 <strong>{tag.name}</strong>
-                <span style={{ fontSize: '0.8em', color: '#666', background: '#fff', padding: '2px 6px', borderRadius: 10 }}>{tag.count}</span>
+                <span style={{ fontSize: '0.8em', color: 'var(--text-muted)', background: 'var(--bg-color)', padding: '2px 6px', borderRadius: 10 }}>{tag.count}</span>
             </Link>
           ))}
           {tags.length === 0 && <p>No topics found.</p>}
         </div>
       )}
 
-      <footer style={{ marginTop: 40, borderTop: '1px solid #eee', paddingTop: 20, color: '#888', fontSize: '0.8rem', textAlign: 'center' }}>
+      <footer style={{ marginTop: 40, borderTop: '1px solid var(--border-color)', paddingTop: 20, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>
         <p>Gitopedia v{process.env.NEXT_PUBLIC_GITOPEDIA_VERSION || 'dev'}</p>
       </footer>
     </main>

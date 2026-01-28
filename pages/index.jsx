@@ -129,7 +129,7 @@ export default function Home({ articles }) {
                 </Link>
                 {r.snippet && (
                   <div
-                    style={{ fontSize: '0.9em', color: '#555' }}
+                    style={{ fontSize: '0.9em', color: 'var(--text-muted)' }}
                     dangerouslySetInnerHTML={{ __html: r.snippet }}
                   />
                 )}
@@ -145,7 +145,7 @@ export default function Home({ articles }) {
           <li key={a.href} style={{ marginBottom: '8px' }}>
             <Link href={a.href}>{a.title}</Link>
             {(a.created || a.model || a.researcherVersion) && (
-              <span style={{ marginLeft: '12px', fontSize: '0.85em', color: '#666' }}>
+              <span style={{ marginLeft: '12px', fontSize: '0.85em', color: 'var(--text-muted)' }}>
                 {a.created && (
                   <span>
                     {new Date(a.created).toLocaleString('en-US', { 
@@ -175,7 +175,7 @@ export default function Home({ articles }) {
         ))}
       </ul>
 
-      <footer style={{ marginTop: 40, borderTop: '1px solid #eee', paddingTop: 20, color: '#888', fontSize: '0.8rem', textAlign: 'center' }}>
+      <footer style={{ marginTop: 40, borderTop: '1px solid var(--border-color)', paddingTop: 20, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>
         <p>Gitopedia v{process.env.NEXT_PUBLIC_GITOPEDIA_VERSION || 'dev'}</p>
       </footer>
     </main>
