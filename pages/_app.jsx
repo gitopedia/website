@@ -4,7 +4,9 @@ import Script from 'next/script';
 import Link from 'next/link';
 
 export default function App({ Component, pageProps }) {
-  const [darkMode, setDarkMode] = useState(false);
+  // Initialize with null to detect first render
+  const [darkMode, setDarkMode] = useState(null);
+  const [mounted, setMounted] = useState(false);
 
   // Load dark mode preference from localStorage on mount
   useEffect(() => {
@@ -15,19 +17,55 @@ export default function App({ Component, pageProps }) {
       // Check system preference
       setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
     }
+    setMounted(true);
   }, []);
 
   // Save dark mode preference and apply to document
   useEffect(() => {
-    localStorage.setItem('darkMode', darkMode);
-    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    if (darkMode !== null) {
+      localStorage.setItem('darkMode', darkMode);
+      document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    }
   }, [darkMode]);
+
+  // Determine header background color based on mode
+  const headerBgColor = darkMode === false ? '#4a4a4a' : '#1a1a1a';
 
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Google Fonts - Source Serif 4 + Playfair Display */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&display=swap" 
+          rel="stylesheet" 
+        />
+        {/* KaTeX CSS for math rendering */}
+        <link 
+          rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" 
+          integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" 
+          crossOrigin="anonymous"
+        />
       </Head>
+      
+      {/* Inline script to prevent flash - runs before React hydrates */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                var saved = localStorage.getItem('darkMode');
+                var isDark = saved !== null ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+              } catch (e) {}
+            })();
+          `,
+        }}
+      />
+      
       <style jsx global>{`
         :root {
           --bg-color: #ffffff;
@@ -35,6 +73,7 @@ export default function App({ Component, pageProps }) {
           --text-muted: #666666;
           --border-color: #eeeeee;
           --link-color: #0066cc;
+          --header-bg: #4a4a4a;
         }
         [data-theme="dark"] {
           --bg-color: #1a1a1a;
@@ -42,6 +81,7 @@ export default function App({ Component, pageProps }) {
           --text-muted: #999999;
           --border-color: #333333;
           --link-color: #5ca8ff;
+          --header-bg: #1a1a1a;
         }
         html, body {
           margin: 0;
@@ -64,6 +104,70 @@ export default function App({ Component, pageProps }) {
         button:hover {
           opacity: 0.9;
         }
+        
+        /* References styling - each reference on new line */
+        .references li,
+        article ol li,
+        article ul li {
+          margin-bottom: 0.5em;
+        }
+        
+        /* Responsive content width - prevent horizontal scroll */
+        article {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+        }
+        article pre {
+          overflow-x: auto;
+          max-width: 100%;
+        }
+        article img {
+          max-width: 100%;
+          height: auto;
+        }
+        
+        /* KaTeX responsive */
+        .katex-display {
+          overflow-x: auto;
+          overflow-y: hidden;
+          max-width: 100%;
+        }
+        
+        /* Article Typography - Source Serif 4 + Playfair Display */
+        article {
+          font-family: 'Source Serif 4', Georgia, serif;
+          font-size: 17px;
+          line-height: 1.7;
+        }
+        article h1, article h2, article h3, article h4, article h5, article h6 {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-weight: 600;
+          line-height: 1.3;
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        article h2 {
+          font-size: 1.75em;
+        }
+        article h3 {
+          font-size: 1.4em;
+        }
+        article p {
+          margin-bottom: 1.2em;
+        }
+        article blockquote {
+          border-left: 3px solid var(--link-color);
+          margin-left: 0;
+          padding-left: 20px;
+          font-style: italic;
+          opacity: 0.9;
+        }
+        article code {
+          font-size: 0.9em;
+          background: rgba(128,128,128,0.15);
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
       `}</style>
 
       {/* Top Navigation Bar */}
@@ -71,11 +175,12 @@ export default function App({ Component, pageProps }) {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        backgroundColor: '#1a1a1a',
-        padding: '12px 24px',
+        backgroundColor: mounted ? headerBgColor : 'var(--header-bg)',
+        padding: 'clamp(8px, 2vw, 12px) 24px',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        transition: 'background-color 0.2s'
       }}>
         {/* Site Icon / Logo */}
         <Link href="/" style={{ 
@@ -85,11 +190,16 @@ export default function App({ Component, pageProps }) {
           textDecoration: 'none',
           color: '#fff'
         }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
           </svg>
-          <span style={{ fontWeight: 600, fontSize: '1.1rem' }}>Gitopedia</span>
+          <span style={{ 
+            fontWeight: 700, 
+            fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
+            fontFamily: '"DM Sans", "Outfit", "Sora", system-ui, -apple-system, sans-serif',
+            letterSpacing: '-0.02em'
+          }}>Gitopedia</span>
         </Link>
 
         {/* Dark/Light Mode Toggle */}
@@ -97,36 +207,42 @@ export default function App({ Component, pageProps }) {
           onClick={() => setDarkMode(!darkMode)}
           style={{
             background: 'transparent',
-            border: '1px solid #444',
+            border: '1px solid #666',
             borderRadius: '6px',
-            padding: '6px 10px',
+            padding: '6px 12px',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             color: '#fff',
-            fontSize: '0.9rem'
+            fontSize: '0.9rem',
+            fontFamily: 'system-ui, -apple-system, sans-serif'
           }}
           aria-label="Toggle dark mode"
         >
           {darkMode ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="5"></circle>
-              <line x1="12" y1="1" x2="12" y2="3"></line>
-              <line x1="12" y1="21" x2="12" y2="23"></line>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-              <line x1="1" y1="12" x2="3" y2="12"></line>
-              <line x1="21" y1="12" x2="23" y2="12"></line>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            </svg>
+            <>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              Dark
+            </>
           ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
+            <>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              Light
+            </>
           )}
-          {darkMode ? 'Light' : 'Dark'}
         </button>
       </header>
 
@@ -150,17 +266,3 @@ export default function App({ Component, pageProps }) {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
