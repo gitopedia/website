@@ -57,44 +57,48 @@ export default function ArticlePage({ article, page, slug, isIndexPage }) {
   return <ArticleView article={article} slug={slug} />;
 }
 
-// Cascading breadcrumb component with arrow glyph
+// Inline cascading breadcrumb component with chevron separator
 function CascadingBreadcrumbs({ items }) {
   if (!items || items.length === 0) return null;
   
   return (
     <nav style={{ 
       marginBottom: '24px',
-      fontSize: '0.85em'
+      fontSize: '0.85em',
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'baseline',
+      gap: '0'
     }}>
       {items.map((item, index) => (
-        <div 
+        <span 
           key={item.href || index}
           style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            marginLeft: index * 20,
-            marginBottom: '4px'
+            position: 'relative',
+            top: `${index * 2}px`
           }}
         >
-          {/* Arrow glyph: curves down then right */}
-          <svg 
-            width="16" 
-            height="16" 
-            viewBox="0 0 16 16" 
-            fill="none" 
-            stroke="var(--text-muted)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ 
-              marginRight: '6px',
-              opacity: 0.7,
-              flexShrink: 0
-            }}
-          >
-            <path d="M4 2 L4 10 Q4 12 6 12 L12 12" />
-            <path d="M10 9 L12 12 L10 15" />
-          </svg>
+          {index > 0 && (
+            <svg 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="var(--text-muted)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ 
+                margin: '0 6px',
+                opacity: 0.5,
+                flexShrink: 0
+              }}
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          )}
           {item.href ? (
             <Link 
               href={item.href} 
@@ -114,7 +118,7 @@ function CascadingBreadcrumbs({ items }) {
               {item.label}
             </span>
           )}
-        </div>
+        </span>
       ))}
     </nav>
   );
