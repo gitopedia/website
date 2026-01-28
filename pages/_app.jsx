@@ -197,17 +197,18 @@ export default function App({ Component, pageProps }) {
         }
         article .references h2 {
           font-size: 1.4em;
-          margin-bottom: 1em;
+          margin-bottom: 0.75em;
         }
         article .references ol {
           padding-left: 1.5em;
           list-style-type: decimal;
+          margin: 0;
         }
         article .references ol li {
           display: list-item;
-          margin-bottom: 1em;
-          padding-left: 0.5em;
-          line-height: 1.6;
+          margin-bottom: 0.4em;
+          padding-left: 0.25em;
+          line-height: 1.5;
         }
         article .references a {
           word-break: break-all;
