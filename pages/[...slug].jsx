@@ -286,11 +286,11 @@ function ArticleView({ article, slug }) {
             margin: 0,
             color: '#fff',
             fontFamily: '"DM Sans", "Outfit", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            fontSize: 'clamp(2rem, 7vw, 5.5rem)',
+            fontSize: 'clamp(2.5rem, 9vw, 7rem)',
             fontWeight: 800,
-            textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 4px 24px rgba(0,0,0,0.4)',
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em'
+            textShadow: '0 2px 12px rgba(0,0,0,0.7), 0 6px 32px rgba(0,0,0,0.5)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.025em'
           }}>
             {articleTitle}
           </h1>
@@ -309,10 +309,10 @@ function ArticleView({ article, slug }) {
         {!headerImageSrc && (
           <h1 style={{ 
             marginBottom: '8px',
-            fontSize: 'clamp(1.8rem, 5vw, 3rem)',
+            fontSize: 'clamp(2.2rem, 6vw, 4rem)',
             fontFamily: '"DM Sans", "Outfit", system-ui, -apple-system, sans-serif',
             fontWeight: 700,
-            letterSpacing: '-0.02em'
+            letterSpacing: '-0.025em'
           }}>
             {articleTitle}
           </h1>

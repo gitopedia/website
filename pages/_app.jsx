@@ -4,32 +4,103 @@ import Script from 'next/script';
 import Link from 'next/link';
 
 export default function App({ Component, pageProps }) {
-  // Initialize with null to detect first render
-  const [darkMode, setDarkMode] = useState(null);
+  // Theme: 'light', 'dark', or 'reader'
+  const [theme, setTheme] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [textSize, setTextSize] = useState(17); // Base text size in px
 
-  // Load dark mode preference from localStorage on mount
+  // Load preferences from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('darkMode');
-    if (saved !== null) {
-      setDarkMode(saved === 'true');
+    const savedTheme = localStorage.getItem('theme');
+    const savedTextSize = localStorage.getItem('textSize');
+    
+    if (savedTheme) {
+      setTheme(savedTheme);
     } else {
-      // Check system preference
-      setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      // Check system preference for dark mode
+      setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     }
+    
+    if (savedTextSize) {
+      setTextSize(parseInt(savedTextSize, 10));
+    }
+    
     setMounted(true);
   }, []);
 
-  // Save dark mode preference and apply to document
+  // Save preferences and apply to document
   useEffect(() => {
-    if (darkMode !== null) {
-      localStorage.setItem('darkMode', darkMode);
-      document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    if (theme !== null) {
+      localStorage.setItem('theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
     }
-  }, [darkMode]);
+  }, [theme]);
 
-  // Determine header background color based on mode
-  const headerBgColor = darkMode === false ? '#4a4a4a' : '#1a1a1a';
+  useEffect(() => {
+    localStorage.setItem('textSize', textSize);
+    document.documentElement.style.setProperty('--article-font-size', `${textSize}px`);
+  }, [textSize]);
+
+  // Cycle through themes: light -> reader -> dark -> light
+  const cycleTheme = () => {
+    if (theme === 'light') setTheme('reader');
+    else if (theme === 'reader') setTheme('dark');
+    else setTheme('light');
+  };
+
+  // Text size controls
+  const increaseTextSize = () => setTextSize(prev => Math.min(prev + 2, 28));
+  const decreaseTextSize = () => setTextSize(prev => Math.max(prev - 2, 12));
+
+  // Determine header background color based on theme
+  const getHeaderBgColor = () => {
+    if (theme === 'dark') return '#1a1a1a';
+    if (theme === 'reader') return '#5c4a3a';
+    return '#4a4a4a';
+  };
+
+  // Get theme icon and label
+  const getThemeInfo = () => {
+    if (theme === 'dark') {
+      return {
+        label: 'Dark',
+        icon: (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        )
+      };
+    }
+    if (theme === 'reader') {
+      return {
+        label: 'Reader',
+        icon: (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+        )
+      };
+    }
+    return {
+      label: 'Light',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      )
+    };
+  };
+
+  const themeInfo = getThemeInfo();
 
   return (
     <>
@@ -57,9 +128,13 @@ export default function App({ Component, pageProps }) {
           __html: `
             (function() {
               try {
-                var saved = localStorage.getItem('darkMode');
-                var isDark = saved !== null ? saved === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+                var savedTheme = localStorage.getItem('theme');
+                var theme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+                var savedTextSize = localStorage.getItem('textSize');
+                if (savedTextSize) {
+                  document.documentElement.style.setProperty('--article-font-size', savedTextSize + 'px');
+                }
               } catch (e) {}
             })();
           `,
@@ -74,6 +149,7 @@ export default function App({ Component, pageProps }) {
           --border-color: #eeeeee;
           --link-color: #0066cc;
           --header-bg: #4a4a4a;
+          --article-font-size: 17px;
         }
         [data-theme="dark"] {
           --bg-color: #1a1a1a;
@@ -82,6 +158,14 @@ export default function App({ Component, pageProps }) {
           --border-color: #333333;
           --link-color: #5ca8ff;
           --header-bg: #1a1a1a;
+        }
+        [data-theme="reader"] {
+          --bg-color: #f5efe6;
+          --text-color: #3d3229;
+          --text-muted: #6b5d4d;
+          --border-color: #d4c9b9;
+          --link-color: #8b5a2b;
+          --header-bg: #5c4a3a;
         }
         html, body {
           margin: 0;
@@ -136,7 +220,7 @@ export default function App({ Component, pageProps }) {
         /* Article Typography - Source Serif 4 + Playfair Display */
         article {
           font-family: 'Source Serif 4', Georgia, serif;
-          font-size: 17px;
+          font-size: var(--article-font-size);
           line-height: 1.7;
         }
         article h1, article h2, article h3, article h4, article h5, article h6 {
@@ -175,7 +259,7 @@ export default function App({ Component, pageProps }) {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        backgroundColor: mounted ? headerBgColor : 'var(--header-bg)',
+        backgroundColor: mounted ? getHeaderBgColor() : 'var(--header-bg)',
         padding: 'clamp(8px, 2vw, 12px) 24px',
         display: 'flex',
         justifyContent: 'space-between',
@@ -190,60 +274,82 @@ export default function App({ Component, pageProps }) {
           textDecoration: 'none',
           color: '#fff'
         }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
           </svg>
           <span style={{ 
             fontWeight: 700, 
-            fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
+            fontSize: 'clamp(1.4rem, 4vw, 1.8rem)',
             fontFamily: '"DM Sans", "Outfit", "Sora", system-ui, -apple-system, sans-serif',
             letterSpacing: '-0.02em'
           }}>Gitopedia</span>
         </Link>
 
-        {/* Dark/Light Mode Toggle */}
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          style={{
-            background: 'transparent',
-            border: '1px solid #666',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: '#fff',
-            fontSize: '0.9rem',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
-          }}
-          aria-label="Toggle dark mode"
-        >
-          {darkMode ? (
-            <>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-              Dark
-            </>
-          ) : (
-            <>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-              Light
-            </>
-          )}
-        </button>
+        {/* Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Text Size Controls */}
+          <button
+            onClick={decreaseTextSize}
+            style={{
+              background: 'transparent',
+              border: '1px solid #666',
+              borderRadius: '6px',
+              padding: '6px 10px',
+              cursor: 'pointer',
+              color: '#fff',
+              fontSize: '1rem',
+              fontWeight: 600,
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              lineHeight: 1
+            }}
+            aria-label="Decrease text size"
+            title="Decrease text size"
+          >
+            A−
+          </button>
+          <button
+            onClick={increaseTextSize}
+            style={{
+              background: 'transparent',
+              border: '1px solid #666',
+              borderRadius: '6px',
+              padding: '6px 10px',
+              cursor: 'pointer',
+              color: '#fff',
+              fontSize: '1rem',
+              fontWeight: 600,
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              lineHeight: 1
+            }}
+            aria-label="Increase text size"
+            title="Increase text size"
+          >
+            A+
+          </button>
+
+          {/* Theme Toggle */}
+          <button
+            onClick={cycleTheme}
+            style={{
+              background: 'transparent',
+              border: '1px solid #666',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: '#fff',
+              fontSize: '0.9rem',
+              fontFamily: 'system-ui, -apple-system, sans-serif'
+            }}
+            aria-label="Toggle theme"
+          >
+            {themeInfo.icon}
+            {themeInfo.label}
+          </button>
+        </div>
       </header>
 
       {process.env.NEXT_PUBLIC_ANALYTICS_ID && (
