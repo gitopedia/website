@@ -191,7 +191,8 @@ function ArticleView({ article, slug }) {
         <div style={{ 
           width: '100%', 
           maxHeight: '75vh', 
-          overflow: 'hidden'
+          overflow: 'hidden',
+          position: 'relative'
         }}>
           <img 
             src={headerImageSrc} 
@@ -204,12 +205,27 @@ function ArticleView({ article, slug }) {
               objectPosition: 'center'
             }} 
           />
+          {/* Title overlay on image */}
+          <h1 style={{ 
+            position: 'absolute',
+            bottom: '24px',
+            left: '24px',
+            right: '24px',
+            margin: 0,
+            color: '#fff',
+            fontSize: 'clamp(2rem, 5vw, 4rem)',
+            fontWeight: 800,
+            textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 4px 24px rgba(0,0,0,0.4)',
+            lineHeight: 1.1
+          }}>
+            {articleTitle}
+          </h1>
         </div>
       )}
 
       <div style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '0 auto', padding: '24px 24px 40px' }}>
-        {/* Topic Heading */}
-        <h1 style={{ marginBottom: '8px' }}>{articleTitle}</h1>
+        {/* Title shown only if no header image */}
+        {!headerImageSrc && <h1 style={{ marginBottom: '8px' }}>{articleTitle}</h1>}
 
         {/* Breadcrumb Navigation */}
         <nav style={{ 
