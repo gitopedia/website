@@ -86,7 +86,10 @@ jobs:
           aws-region: ${{ secrets.GITOPEDIA_AWS_REGION }}
       - name: Deploy to S3
         run: |
-          aws s3 sync out/ s3://${{ secrets.GITOPEDIA_WEBSITE_BUCKET }}/ --delete
+          # Sync all files except AVIF (let S3 auto-detect MIME types)
+          aws s3 sync out/ s3://${{ secrets.GITOPEDIA_WEBSITE_BUCKET }}/ --delete --exclude "*.avif"
+          # Sync AVIF files with correct content type
+          aws s3 sync out/ s3://${{ secrets.GITOPEDIA_WEBSITE_BUCKET }}/ --exclude "*" --include "*.avif" --content-type "image/avif"
       - name: Invalidate CloudFront
         run: |
           aws cloudfront create-invalidation \
