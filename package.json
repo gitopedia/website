@@ -6,7 +6,8 @@
     "dev": "next dev",
     "prebuild": "node scripts/copy-images.js",
     "build": "next build",
-    "start": "serve -s out"
+    "start": "serve -s out",
+    "convert-images": "node scripts/convert-images.js"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
@@ -24,6 +25,7 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
+    "sharp": "^0.32.6",
     "unified": "^11.0.5"
   }
 }

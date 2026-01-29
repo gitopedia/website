@@ -2,6 +2,7 @@
 /**
  * Copies article and index page images from the Compendium to public/ before the Next.js build.
  * This ensures images are available at the correct URL paths.
+ * Handles AVIF format images (including -medium variants).
  */
 
 const fs = require('fs');
@@ -11,6 +12,14 @@ const DEFAULT_COMPENDIUM = path.resolve(__dirname, '../../gitopedia/Compendium')
 const COMPENDIUM_DIR = process.env.GITOPEDIA_DIR ? path.resolve(process.env.GITOPEDIA_DIR) : DEFAULT_COMPENDIUM;
 const PUBLIC_DIR = path.resolve(__dirname, '../public');
 
+// Supported image extensions
+const IMAGE_EXTENSIONS = ['.avif', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
+
+function isImageFile(filename) {
+  const ext = path.extname(filename).toLowerCase();
+  return IMAGE_EXTENSIONS.includes(ext);
+}
+
 // Walk and collect article markdown files (non-index.md)
 function walkArticles(dir, list = []) {
   if (!fs.existsSync(dir)) return list;
@@ -18,6 +27,7 @@ function walkArticles(dir, list = []) {
   for (const e of entries) {
     if (e.name.startsWith('.')) continue;
     if (e.name === '_incoming') continue;
+    if (e.name === '_debug') continue;
     const cur = path.join(dir, e.name);
     if (e.isDirectory()) {
       walkArticles(cur, list);
@@ -35,6 +45,7 @@ function walkIndexPages(dir, list = []) {
   for (const e of entries) {
     if (e.name.startsWith('.')) continue;
     if (e.name === '_incoming') continue;
+    if (e.name === '_debug') continue;
     const cur = path.join(dir, e.name);
     if (e.isDirectory()) {
       walkIndexPages(cur, list);
@@ -47,6 +58,25 @@ function walkIndexPages(dir, list = []) {
     }
   }
   return list;
+}
+
+function copyImagesFromDir(imgSourceDir, imgDestDir) {
+  let count = 0;
+  if (!fs.existsSync(imgSourceDir)) return count;
+  
+  fs.mkdirSync(imgDestDir, { recursive: true });
+  
+  const files = fs.readdirSync(imgSourceDir);
+  for (const file of files) {
+    if (!isImageFile(file)) continue;
+    const src = path.join(imgSourceDir, file);
+    const dest = path.join(imgDestDir, file);
+    if (fs.statSync(src).isFile()) {
+      fs.copyFileSync(src, dest);
+      count++;
+    }
+  }
+  return count;
 }
 
 function copyImages() {
@@ -70,24 +100,10 @@ function copyImages() {
     const parentDir = path.dirname(articlePath);
     const imgSourceDir = path.join(parentDir, 'img');
     
-    if (!fs.existsSync(imgSourceDir)) continue;
-    
     // Destination: public/{article-url-path}/img/
-    // The article URL is /science/physics/quantum-mechanics/pauli-exclusion-principle/
-    // so relative img/ paths resolve to /science/physics/quantum-mechanics/pauli-exclusion-principle/img/
     const imgDestDir = path.join(PUBLIC_DIR, ...slugParts, 'img');
     
-    fs.mkdirSync(imgDestDir, { recursive: true });
-    
-    const files = fs.readdirSync(imgSourceDir);
-    for (const file of files) {
-      const src = path.join(imgSourceDir, file);
-      const dest = path.join(imgDestDir, file);
-      if (fs.statSync(src).isFile()) {
-        fs.copyFileSync(src, dest);
-        copiedCount++;
-      }
-    }
+    copiedCount += copyImagesFromDir(imgSourceDir, imgDestDir);
   }
   
   // Copy images for index pages (domain/category/topic)
@@ -101,24 +117,10 @@ function copyImages() {
     const parentDir = path.dirname(indexPath);
     const imgSourceDir = path.join(parentDir, 'img');
     
-    if (!fs.existsSync(imgSourceDir)) continue;
-    
     // Destination: public/{index-url-path}/img/
-    // The index URL is /science/ or /science/physics/
-    // so relative img/ paths resolve to /science/img/ or /science/physics/img/
     const imgDestDir = path.join(PUBLIC_DIR, ...slugParts, 'img');
     
-    fs.mkdirSync(imgDestDir, { recursive: true });
-    
-    const files = fs.readdirSync(imgSourceDir);
-    for (const file of files) {
-      const src = path.join(imgSourceDir, file);
-      const dest = path.join(imgDestDir, file);
-      if (fs.statSync(src).isFile()) {
-        fs.copyFileSync(src, dest);
-        copiedCount++;
-      }
-    }
+    copiedCount += copyImagesFromDir(imgSourceDir, imgDestDir);
   }
   
   console.log(`Copied ${copiedCount} image files`);
