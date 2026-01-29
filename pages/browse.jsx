@@ -32,9 +32,9 @@ export default function Browse() {
   }, []);
 
   return (
-    <main style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '40px auto', padding: '0 24px', fontFamily: '-apple-system, sans-serif' }}>
+    <main style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '40px auto', padding: '0 24px' }}>
       <nav style={{ marginBottom: 24 }}>
-        <Link href="/" style={{ textDecoration: 'none', fontWeight: 'bold', color: 'var(--link-color)' }}>← Back to Search</Link>
+        <Link href="/" style={{ textDecoration: 'none', color: 'var(--link-color)' }}>← Back to Home</Link>
       </nav>
       
       <h1>Browse Topics</h1>
@@ -69,7 +69,13 @@ export default function Browse() {
       )}
 
       <footer style={{ marginTop: 40, borderTop: '1px solid var(--border-color)', paddingTop: 20, color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center' }}>
-        <p>Gitopedia v{process.env.NEXT_PUBLIC_GITOPEDIA_VERSION || 'dev'}</p>
+        <p>
+          <Link href="/license" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>License</Link>
+          {' · '}
+          <Link href="/terms" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>Terms of Use</Link>
+          {' · '}
+          <Link href="/privacy" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>Privacy Policy</Link>
+        </p>
       </footer>
     </main>
   );

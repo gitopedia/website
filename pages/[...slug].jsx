@@ -1,5 +1,10 @@
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAllArticles, getArticle, getAllIndexPages, getIndexPage } from '../lib/content';
+import DisplayModeToggle from '../components/DisplayModeToggle';
+import ListView from '../components/ListView';
+import TilesView from '../components/TilesView';
+import RowsView from '../components/RowsView';
 
 export async function getStaticPaths() {
   const articles = getAllArticles();
@@ -57,8 +62,54 @@ export default function ArticlePage({ article, page, slug, isIndexPage }) {
   return <ArticleView article={article} slug={slug} />;
 }
 
+// Helper function to extract links from HTML content
+function extractLinksFromHtml(html, basePath) {
+  const links = [];
+  // Match <a href="...">...</a> patterns
+  const linkRegex = /<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g;
+  let match;
+  while ((match = linkRegex.exec(html)) !== null) {
+    let href = match[1];
+    const title = match[2].trim();
+    // Skip external links and anchor links
+    if (href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) continue;
+    // Convert relative paths to absolute
+    if (!href.startsWith('/')) {
+      href = basePath + '/' + href;
+    }
+    // Clean up the href (remove trailing slashes, .md extensions)
+    href = href.replace(/\/+$/, '').replace(/\.md$/, '');
+    links.push({ href, title });
+  }
+  return links;
+}
+
+// Helper function to get header image for a child item
+function getChildHeaderImage(parentSlug, childHref) {
+  // Extract the child slug from the href
+  const parts = childHref.split('/').filter(Boolean);
+  const childSlug = parts[parts.length - 1];
+  // Try medium version first
+  return `${childHref}/img/${childSlug}_header-medium.avif`;
+}
+
 // Component for domain/category/topic index pages
 function IndexPageView({ page, slug }) {
+  const [displayMode, setDisplayMode] = useState('list');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('displayMode');
+    if (saved) {
+      setDisplayMode(saved);
+    }
+    setMounted(true);
+  }, []);
+
+  const handleModeChange = (mode) => {
+    setDisplayMode(mode);
+  };
+
   const fm = page.frontMatter || {};
   const title = fm.title || 'Untitled';
   const domain = fm.domain;
@@ -87,6 +138,23 @@ function IndexPageView({ page, slug }) {
   if (headerImageSrc) {
     contentWithoutHeader = contentWithoutHeader.replace(/<h1[^>]*>[^<]*<\/h1>/, '');
   }
+
+  // Extract child items from content for display mode views
+  const basePath = '/' + slug.join('/');
+  const childItems = extractLinksFromHtml(contentWithoutHeader, basePath).map(item => ({
+    ...item,
+    imageSrc: getChildHeaderImage(slug, item.href)
+  }));
+
+  // Determine section title based on page type
+  const sectionTitle = page.pageType === 'domain' ? 'Categories' 
+    : page.pageType === 'category' ? 'Topics' 
+    : 'Articles';
+
+  // Remove the list section from HTML content (we'll render it with view components)
+  let contentWithoutList = contentWithoutHeader;
+  // Remove <h2>Categories</h2> or <h2>Topics</h2> or <h2>Articles</h2> and the following <ul>...</ul>
+  contentWithoutList = contentWithoutList.replace(/<h2[^>]*>(Categories|Topics|Articles)<\/h2>\s*<ul>[\s\S]*?<\/ul>/gi, '');
   
   return (
     <main style={{ maxWidth: '100%', margin: 0, padding: 0 }}>
@@ -217,26 +285,53 @@ function IndexPageView({ page, slug }) {
           </a>
         </div>
 
-        {/* Page Content */}
-        <article 
-          dangerouslySetInnerHTML={{ __html: contentWithoutHeader }}
-          style={{
-            overflowWrap: 'break-word',
-            wordWrap: 'break-word',
-            minWidth: 0
-          }}
-        />
+        {/* Non-list content (if any) */}
+        {contentWithoutList.trim() && (
+          <article 
+            dangerouslySetInnerHTML={{ __html: contentWithoutList }}
+            style={{
+              overflowWrap: 'break-word',
+              wordWrap: 'break-word',
+              minWidth: 0,
+              marginBottom: '24px'
+            }}
+          />
+        )}
 
-        {/* Footer with GitHub Links */}
-        {githubIssueIds.length > 0 && (
-          <footer style={{ 
-            marginTop: '40px', 
-            paddingTop: '20px', 
-            borderTop: '1px solid var(--border-color)',
-            fontSize: '0.9em',
-            color: 'var(--text-muted)'
-          }}>
-            <div>
+        {/* Child Items Section with Display Mode Toggle */}
+        {childItems.length > 0 && (
+          <>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginBottom: '20px'
+            }}>
+              <h2 style={{ margin: 0 }}>{sectionTitle}</h2>
+              {mounted && (
+                <DisplayModeToggle 
+                  storageKey="displayMode" 
+                  onChange={handleModeChange} 
+                />
+              )}
+            </div>
+
+            {displayMode === 'list' && <ListView items={childItems} />}
+            {displayMode === 'tiles' && <TilesView items={childItems} />}
+            {displayMode === 'rows' && <RowsView items={childItems} />}
+          </>
+        )}
+
+        {/* Footer with GitHub Links and Legal */}
+        <footer style={{ 
+          marginTop: '40px', 
+          paddingTop: '20px', 
+          borderTop: '1px solid var(--border-color)',
+          fontSize: '0.9em',
+          color: 'var(--text-muted)'
+        }}>
+          {githubIssueIds.length > 0 && (
+            <div style={{ marginBottom: '16px' }}>
               <strong>GitHub Issues:</strong>{' '}
               {githubIssueIds.map((id, index) => (
                 <span key={id}>
@@ -252,8 +347,15 @@ function IndexPageView({ page, slug }) {
                 </span>
               ))}
             </div>
-          </footer>
-        )}
+          )}
+          <div style={{ textAlign: 'center', fontSize: '0.8rem' }}>
+            <Link href="/license" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>License</Link>
+            {' · '}
+            <Link href="/terms" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>Terms of Use</Link>
+            {' · '}
+            <Link href="/privacy" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>Privacy Policy</Link>
+          </div>
+        </footer>
       </div>
     </main>
   );
@@ -383,26 +485,32 @@ function ArticleView({ article, slug }) {
             gap: '4px',
             alignItems: 'center'
           }}>
+            <Link href="/" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+              Home
+            </Link>
             {domain && domainSlug && (
               <>
+                <span style={{ margin: '0 4px' }}>/</span>
                 <Link href={`/${domainSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
                   {domain}
                 </Link>
-                <span style={{ margin: '0 4px' }}>/</span>
               </>
             )}
             {category && categorySlug && domainSlug && (
               <>
+                <span style={{ margin: '0 4px' }}>/</span>
                 <Link href={`/${domainSlug}/${categorySlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
                   {category}
                 </Link>
-                <span style={{ margin: '0 4px' }}>/</span>
               </>
             )}
             {topic && topicSlug && categorySlug && domainSlug && (
-              <Link href={`/${domainSlug}/${categorySlug}/${topicSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
-                {topic}
-              </Link>
+              <>
+                <span style={{ margin: '0 4px' }}>/</span>
+                <Link href={`/${domainSlug}/${categorySlug}/${topicSlug}`} style={{ color: 'var(--link-color)', textDecoration: 'none' }}>
+                  {topic}
+                </Link>
+              </>
             )}
           </nav>
 
@@ -486,7 +594,8 @@ function ArticleView({ article, slug }) {
               display: 'flex', 
               flexWrap: 'wrap', 
               gap: '16px',
-              marginTop: '12px'
+              marginTop: '12px',
+              marginBottom: '16px'
             }}>
               {githubIssueIds.length > 0 && (
                 <div>
@@ -526,6 +635,15 @@ function ArticleView({ article, slug }) {
               )}
             </div>
           )}
+
+          {/* Legal Links */}
+          <div style={{ textAlign: 'center', fontSize: '0.8rem' }}>
+            <Link href="/license" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>License</Link>
+            {' · '}
+            <Link href="/terms" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>Terms of Use</Link>
+            {' · '}
+            <Link href="/privacy" style={{ color: 'var(--link-color)', textDecoration: 'none' }}>Privacy Policy</Link>
+          </div>
         </footer>
       </div>
     </main>

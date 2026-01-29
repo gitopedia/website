@@ -17,8 +17,8 @@ export default function App({ Component, pageProps }) {
     if (savedTheme) {
       setTheme(savedTheme);
     } else {
-      // Check system preference for dark mode
-      setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      // Default to reader mode
+      setTheme('reader');
     }
     
     if (savedTextSize) {
@@ -129,7 +129,7 @@ export default function App({ Component, pageProps }) {
             (function() {
               try {
                 var savedTheme = localStorage.getItem('theme');
-                var theme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                var theme = savedTheme || 'reader';
                 document.documentElement.setAttribute('data-theme', theme);
                 var savedTextSize = localStorage.getItem('textSize');
                 if (savedTextSize) {
@@ -253,7 +253,46 @@ export default function App({ Component, pageProps }) {
           font-size: 1.1em;
         }
         
-        /* Article Typography - Source Serif 4 + Playfair Display */
+        /* Page Typography - Source Serif 4 + Playfair Display */
+        main {
+          font-family: 'Source Serif 4', Georgia, serif;
+          font-size: var(--article-font-size);
+          line-height: 1.7;
+        }
+        main h1, main h2, main h3, main h4, main h5, main h6 {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-weight: 600;
+          line-height: 1.3;
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        main h1 {
+          margin-top: 0;
+        }
+        main h2 {
+          font-size: 1.75em;
+        }
+        main h3 {
+          font-size: 1.4em;
+        }
+        main p {
+          margin-bottom: 1.2em;
+        }
+        main blockquote {
+          border-left: 3px solid var(--link-color);
+          margin-left: 0;
+          padding-left: 20px;
+          font-style: italic;
+          opacity: 0.9;
+        }
+        main code {
+          font-size: 0.9em;
+          background: rgba(128,128,128,0.15);
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+        
+        /* Article-specific typography overrides */
         article {
           font-family: 'Source Serif 4', Georgia, serif;
           font-size: var(--article-font-size);
