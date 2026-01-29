@@ -152,7 +152,8 @@ export default function App({ Component, pageProps }) {
           --link-color: #0066cc;
           --header-bg: #4a4a4a;
           --article-font-size: 17px;
-          --card-text-bg: rgba(0,0,0,0.04);
+          --card-text-bg: rgba(255,255,255,0.9);
+          --button-bg: rgba(255,255,255,0.95);
         }
         [data-theme="dark"] {
           --bg-color: #1a1a1a;
@@ -162,6 +163,7 @@ export default function App({ Component, pageProps }) {
           --link-color: #5ca8ff;
           --header-bg: #121212;
           --card-text-bg: rgba(255,255,255,0.06);
+          --button-bg: rgba(255,255,255,0.08);
         }
         [data-theme="reader"] {
           --bg-color: #f5efe6;
@@ -170,7 +172,8 @@ export default function App({ Component, pageProps }) {
           --border-color: #d4c9b9;
           --link-color: #8b5a2b;
           --header-bg: #5c4a3a;
-          --card-text-bg: rgba(0,0,0,0.05);
+          --card-text-bg: rgba(255,255,255,0.5);
+          --button-bg: rgba(255,255,255,0.6);
         }
         html, body {
           margin: 0;
@@ -180,6 +183,14 @@ export default function App({ Component, pageProps }) {
           transition: background-color 0.2s, color 0.2s;
           overflow-x: hidden;
           max-width: 100vw;
+        }
+        /* Remove default focus outlines that cause flashing cursor */
+        *:focus {
+          outline: none;
+        }
+        *:focus-visible {
+          outline: 2px solid var(--link-color);
+          outline-offset: 2px;
         }
         a {
           color: var(--link-color);
@@ -341,6 +352,7 @@ export default function App({ Component, pageProps }) {
           display: flex;
           align-items: center;
           gap: 8px;
+          position: relative;
         }
         .header-controls-inner {
           display: flex;
@@ -353,19 +365,23 @@ export default function App({ Component, pageProps }) {
         .logo-text {
           display: inline;
         }
+        :global(.site-header) {
+          position: sticky !important;
+        }
         @media (max-width: 600px) {
           .header-controls-inner {
             display: ${showControls ? 'flex' : 'none'};
             position: absolute;
-            top: 100%;
+            top: calc(100% + 6px);
             right: 0;
-            left: 0;
-            background-color: inherit;
-            padding: 12px 16px;
-            gap: 8px;
+            background-color: var(--header-bg);
+            padding: 10px 12px;
+            gap: 6px;
             flex-wrap: wrap;
-            justify-content: center;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            justify-content: flex-end;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            min-width: 140px;
           }
           .cog-button {
             display: flex;
@@ -387,7 +403,7 @@ export default function App({ Component, pageProps }) {
         justifyContent: 'space-between',
         alignItems: 'center',
         transition: 'background-color 0.2s'
-      }}>
+      }} className="site-header">
         {/* Site Icon / Logo */}
         <Link href="/" style={{ 
           display: 'flex', 

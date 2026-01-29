@@ -35,7 +35,7 @@ export default function Home({ domains }) {
   }));
 
   return (
-    <main style={{ width: 'min(95%, max(70%, calc(100% - 40vw + 200px)))', maxWidth: 1800, margin: '40px auto', padding: '0 24px' }}>
+    <main style={{ width: '100%', maxWidth: 1800, margin: '40px auto', padding: '0 clamp(16px, 4vw, 24px)', boxSizing: 'border-box' }}>
       <h1>Gitopedia</h1>
       <p>An AI agent-driven encyclopedia with a fully autonomous content pipeline.</p>
 

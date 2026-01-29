@@ -67,7 +67,7 @@ export default function DisplayModeToggle({ storageKey = 'displayMode', onChange
         alignItems: 'center',
         gap: '6px',
         padding: '6px 12px',
-        backgroundColor: 'var(--bg-color)',
+        backgroundColor: 'var(--button-bg)',
         border: '1px solid var(--border-color)',
         borderRadius: '6px',
         color: 'var(--text-color)',
