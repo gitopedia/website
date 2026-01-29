@@ -8,6 +8,7 @@ export default function App({ Component, pageProps }) {
   const [theme, setTheme] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [textSize, setTextSize] = useState(17); // Base text size in px
+  const [showControls, setShowControls] = useState(false); // For mobile menu
 
   // Load preferences from localStorage on mount
   useEffect(() => {
@@ -53,8 +54,9 @@ export default function App({ Component, pageProps }) {
   const decreaseTextSize = () => setTextSize(prev => Math.max(prev - 2, 12));
 
   // Determine header background color based on theme
+  // Dark mode header is slightly darker than body (#1a1a1a)
   const getHeaderBgColor = () => {
-    if (theme === 'dark') return '#1a1a1a';
+    if (theme === 'dark') return '#121212';
     if (theme === 'reader') return '#5c4a3a';
     return '#4a4a4a';
   };
@@ -106,11 +108,11 @@ export default function App({ Component, pageProps }) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Google Fonts - Source Serif 4 + Playfair Display */}
+        {/* Google Fonts - Source Serif 4 + Playfair Display + DM Sans */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&display=swap" 
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,wght@0,400;0,500;0,600;1,400&display=swap" 
           rel="stylesheet" 
         />
         {/* KaTeX CSS for math rendering */}
@@ -150,6 +152,7 @@ export default function App({ Component, pageProps }) {
           --link-color: #0066cc;
           --header-bg: #4a4a4a;
           --article-font-size: 17px;
+          --card-text-bg: rgba(0,0,0,0.04);
         }
         [data-theme="dark"] {
           --bg-color: #1a1a1a;
@@ -157,7 +160,8 @@ export default function App({ Component, pageProps }) {
           --text-muted: #999999;
           --border-color: #333333;
           --link-color: #5ca8ff;
-          --header-bg: #1a1a1a;
+          --header-bg: #121212;
+          --card-text-bg: rgba(255,255,255,0.06);
         }
         [data-theme="reader"] {
           --bg-color: #f5efe6;
@@ -166,6 +170,7 @@ export default function App({ Component, pageProps }) {
           --border-color: #d4c9b9;
           --link-color: #8b5a2b;
           --header-bg: #5c4a3a;
+          --card-text-bg: rgba(0,0,0,0.05);
         }
         html, body {
           margin: 0;
@@ -173,6 +178,8 @@ export default function App({ Component, pageProps }) {
           background-color: var(--bg-color);
           color: var(--text-color);
           transition: background-color 0.2s, color 0.2s;
+          overflow-x: hidden;
+          max-width: 100vw;
         }
         a {
           color: var(--link-color);
@@ -329,13 +336,53 @@ export default function App({ Component, pageProps }) {
         }
       `}</style>
 
+      <style jsx>{`
+        .header-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .header-controls-inner {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .cog-button {
+          display: none;
+        }
+        .logo-text {
+          display: inline;
+        }
+        @media (max-width: 600px) {
+          .header-controls-inner {
+            display: ${showControls ? 'flex' : 'none'};
+            position: absolute;
+            top: 100%;
+            right: 0;
+            left: 0;
+            background-color: inherit;
+            padding: 12px 16px;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+          }
+          .cog-button {
+            display: flex;
+          }
+          .logo-text {
+            display: ${showControls ? 'none' : 'inline'};
+          }
+        }
+      `}</style>
+
       {/* Top Navigation Bar */}
       <header style={{
         position: 'sticky',
         top: 0,
         zIndex: 1000,
         backgroundColor: mounted ? getHeaderBgColor() : 'var(--header-bg)',
-        padding: 'clamp(8px, 2vw, 12px) 24px',
+        padding: 'clamp(6px, 1.5vw, 10px) clamp(12px, 3vw, 24px)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -349,23 +396,24 @@ export default function App({ Component, pageProps }) {
           textDecoration: 'none',
           color: '#fff'
         }}>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
           </svg>
-          <span style={{ 
+          <span className="logo-text" style={{ 
             fontWeight: 700, 
-            fontSize: 'clamp(1.4rem, 4vw, 1.8rem)',
+            fontSize: 'clamp(1.2rem, 3.5vw, 1.6rem)',
             fontFamily: '"DM Sans", "Outfit", "Sora", system-ui, -apple-system, sans-serif',
             letterSpacing: '-0.02em'
           }}>Gitopedia</span>
         </Link>
 
         {/* Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Text Size Controls */}
+        <div className="header-controls">
+          {/* Cog button for mobile */}
           <button
-            onClick={decreaseTextSize}
+            className="cog-button"
+            onClick={() => setShowControls(!showControls)}
             style={{
               background: 'transparent',
               border: '1px solid #666',
@@ -373,57 +421,81 @@ export default function App({ Component, pageProps }) {
               padding: '6px 10px',
               cursor: 'pointer',
               color: '#fff',
-              fontSize: '1rem',
-              fontWeight: 600,
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              lineHeight: 1
-            }}
-            aria-label="Decrease text size"
-            title="Decrease text size"
-          >
-            A−
-          </button>
-          <button
-            onClick={increaseTextSize}
-            style={{
-              background: 'transparent',
-              border: '1px solid #666',
-              borderRadius: '6px',
-              padding: '6px 10px',
-              cursor: 'pointer',
-              color: '#fff',
-              fontSize: '1rem',
-              fontWeight: 600,
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              lineHeight: 1
-            }}
-            aria-label="Increase text size"
-            title="Increase text size"
-          >
-            A+
-          </button>
-
-          {/* Theme Toggle */}
-          <button
-            onClick={cycleTheme}
-            style={{
-              background: 'transparent',
-              border: '1px solid #666',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              cursor: 'pointer',
-              display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              color: '#fff',
-              fontSize: '0.9rem',
-              fontFamily: 'system-ui, -apple-system, sans-serif'
+              justifyContent: 'center'
             }}
-            aria-label="Toggle theme"
+            aria-label="Toggle settings"
+            title="Toggle settings"
           >
-            {themeInfo.icon}
-            {themeInfo.label}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
           </button>
+          
+          <div className="header-controls-inner">
+            {/* Text Size Controls */}
+            <button
+              onClick={decreaseTextSize}
+              style={{
+                background: 'transparent',
+                border: '1px solid #666',
+                borderRadius: '6px',
+                padding: '6px 10px',
+                cursor: 'pointer',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                lineHeight: 1
+              }}
+              aria-label="Decrease text size"
+              title="Decrease text size"
+            >
+              A−
+            </button>
+            <button
+              onClick={increaseTextSize}
+              style={{
+                background: 'transparent',
+                border: '1px solid #666',
+                borderRadius: '6px',
+                padding: '6px 10px',
+                cursor: 'pointer',
+                color: '#fff',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                lineHeight: 1
+              }}
+              aria-label="Increase text size"
+              title="Increase text size"
+            >
+              A+
+            </button>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={cycleTheme}
+              style={{
+                background: 'transparent',
+                border: '1px solid #666',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              }}
+              aria-label="Toggle theme"
+            >
+              {themeInfo.icon}
+              {themeInfo.label}
+            </button>
+          </div>
         </div>
       </header>
 

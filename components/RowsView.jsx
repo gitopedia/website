@@ -19,7 +19,7 @@ export default function RowsView({ items }) {
             display: 'flex',
             textDecoration: 'none',
             color: 'var(--text-color)',
-            borderRadius: '12px',
+            borderRadius: '6px',
             overflow: 'hidden',
             backgroundColor: 'var(--bg-color)',
             border: '1px solid var(--border-color)',
@@ -76,9 +76,11 @@ export default function RowsView({ items }) {
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: '1.25rem',
-            fontWeight: 600
+            fontFamily: '"DM Sans", "Outfit", system-ui, -apple-system, sans-serif',
+            fontSize: '1.15rem',
+            fontWeight: 600,
+            backgroundColor: 'var(--card-text-bg, rgba(128,128,128,0.08))',
+            flex: 1
           }}>
             {item.title}
           </div>

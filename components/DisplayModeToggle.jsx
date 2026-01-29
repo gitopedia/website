@@ -37,13 +37,16 @@ const LABELS = {
 };
 
 export default function DisplayModeToggle({ storageKey = 'displayMode', onChange }) {
-  const [mode, setMode] = useState('list');
+  const [mode, setMode] = useState('tiles');
 
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved && MODES.includes(saved)) {
       setMode(saved);
       if (onChange) onChange(saved);
+    } else {
+      // Default to tiles if nothing saved
+      if (onChange) onChange('tiles');
     }
   }, [storageKey]);
 

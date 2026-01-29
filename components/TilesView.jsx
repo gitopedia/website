@@ -19,7 +19,7 @@ export default function TilesView({ items }) {
             display: 'block',
             textDecoration: 'none',
             color: 'var(--text-color)',
-            borderRadius: '12px',
+            borderRadius: '6px',
             overflow: 'hidden',
             backgroundColor: 'var(--bg-color)',
             border: '1px solid var(--border-color)',
@@ -70,9 +70,10 @@ export default function TilesView({ items }) {
           )}
           <div style={{
             padding: '16px',
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: '1.1rem',
-            fontWeight: 600
+            fontFamily: '"DM Sans", "Outfit", system-ui, -apple-system, sans-serif',
+            fontSize: '1.05rem',
+            fontWeight: 600,
+            backgroundColor: 'var(--card-text-bg, rgba(128,128,128,0.08))'
           }}>
             {item.title}
           </div>

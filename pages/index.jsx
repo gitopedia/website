@@ -12,7 +12,7 @@ export async function getStaticProps() {
 }
 
 export default function Home({ domains }) {
-  const [displayMode, setDisplayMode] = useState('list');
+  const [displayMode, setDisplayMode] = useState('tiles');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -45,7 +45,13 @@ export default function Home({ domains }) {
         alignItems: 'center',
         marginBottom: '20px'
       }}>
-        <h2 style={{ margin: 0 }}>Domains</h2>
+        <h2 style={{ 
+          margin: 0,
+          fontFamily: '"DM Sans", "Outfit", system-ui, -apple-system, sans-serif',
+          fontWeight: 600,
+          fontSize: '1.5rem',
+          letterSpacing: '-0.01em'
+        }}>Domains</h2>
         {mounted && (
           <DisplayModeToggle 
             storageKey="displayMode" 
