@@ -89,6 +89,11 @@ function copyImages() {
 
   let copiedCount = 0;
 
+  // Copy root _img folder (for home page header)
+  const rootImgSource = path.join(COMPENDIUM_DIR, '_img');
+  const rootImgDest = path.join(PUBLIC_DIR, '_img');
+  copiedCount += copyImagesFromDir(rootImgSource, rootImgDest);
+
   // Copy images for articles
   const articles = walkArticles(COMPENDIUM_DIR);
   for (const articlePath of articles) {
