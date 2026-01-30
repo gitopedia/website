@@ -96,12 +96,12 @@ function copyImages() {
     const rel = path.relative(COMPENDIUM_DIR, articlePath);
     const slugParts = rel.replace(/\.md$/i, '').split(path.sep);
     
-    // Source: img/ directory in the same folder as the markdown
+    // Source: _img/ directory in the same folder as the markdown
     const parentDir = path.dirname(articlePath);
-    const imgSourceDir = path.join(parentDir, 'img');
+    const imgSourceDir = path.join(parentDir, '_img');
     
-    // Destination: public/{article-url-path}/img/
-    const imgDestDir = path.join(PUBLIC_DIR, ...slugParts, 'img');
+    // Destination: public/{article-url-path}/_img/
+    const imgDestDir = path.join(PUBLIC_DIR, ...slugParts, '_img');
     
     copiedCount += copyImagesFromDir(imgSourceDir, imgDestDir);
   }
@@ -113,12 +113,12 @@ function copyImages() {
     const rel = path.relative(COMPENDIUM_DIR, indexPath);
     const slugParts = path.dirname(rel).split(path.sep);
     
-    // Source: img/ directory in the same folder as index.md
+    // Source: _img/ directory in the same folder as index.md
     const parentDir = path.dirname(indexPath);
-    const imgSourceDir = path.join(parentDir, 'img');
+    const imgSourceDir = path.join(parentDir, '_img');
     
-    // Destination: public/{index-url-path}/img/
-    const imgDestDir = path.join(PUBLIC_DIR, ...slugParts, 'img');
+    // Destination: public/{index-url-path}/_img/
+    const imgDestDir = path.join(PUBLIC_DIR, ...slugParts, '_img');
     
     copiedCount += copyImagesFromDir(imgSourceDir, imgDestDir);
   }
