@@ -34,7 +34,7 @@ export default function Home({ domains }) {
     imageSrc: d.headerImage
   }));
 
-  const headerImageSrc = '/img/index_header.avif';
+  const headerImageSrc = '/_img/index_header.avif';
   const githubRepoUrl = 'https://github.com/Gitopedia/gitopedia';
 
   return (

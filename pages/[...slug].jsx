@@ -90,7 +90,7 @@ function getChildHeaderImage(parentSlug, childHref) {
   const parts = childHref.split('/').filter(Boolean);
   const childSlug = parts[parts.length - 1];
   // Try medium version first
-  return `${childHref}/img/${childSlug}_header-medium.avif`;
+  return `${childHref}/_img/${childSlug}_header-medium.avif`;
 }
 
 // Component for domain/category/topic index pages
