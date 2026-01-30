@@ -377,17 +377,17 @@ export default function App({ Component, pageProps }) {
             background-color: var(--header-bg);
             padding: 10px 12px;
             gap: 6px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             justify-content: flex-end;
             border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            min-width: 140px;
+            min-width: 220px;
           }
           .cog-button {
             display: flex;
           }
           .logo-text {
-            display: ${showControls ? 'none' : 'inline'};
+            display: inline;
           }
         }
       `}</style>
